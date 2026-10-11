@@ -1098,7 +1098,8 @@
       if (authMode === 'login') {
         const { error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        document.getElementById('joinSuccessMessage').textContent = 'You are logged in successfully.';
+document.getElementById('joinSuccessTitle').textContent = 'Login successful';
+document.getElementById('joinSuccessMessage').textContent = 'You are logged in successfully.';
       } else {
         const { data, error } = await client.auth.signUp({
           email,
