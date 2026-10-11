@@ -1261,7 +1261,10 @@ if (authMode === 'signup' && !name) {
 
   document.getElementById('joinDoneBtn').addEventListener('click', async () => {
   const client = window.supabaseClient;
-
+document.getElementById('profileSetupForm')
+  .addEventListener('submit', async (e) => {
+    
+  });
   if (!client) {
     showToast('Supabase connection nahi hai.');
     return;
