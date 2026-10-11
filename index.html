@@ -415,6 +415,11 @@
     <div id="joinFormWrap">
       <p class="sub">Use your personal email to create an account and connect with the student community.</p>
       <form id="joinForm" novalidate>
+        <div class="field" id="f-name">
+          <label for="in-name">Full name</label>
+          <input type="text" id="in-name" placeholder="Enter your full name" autocomplete="name">
+          <div class="field-error">Enter your name.</div>
+        </div>
         <div class="field" id="f-email">
           <label for="in-email">Email address</label>
           <input type="email" id="in-email" placeholder="you@example.com">
@@ -1157,6 +1162,9 @@ function escapeProfileText(value) {
     joinTitle.textContent = isLogin ? 'Log in to InternConnect' : 'Join with your email';
     joinForm.querySelector('button[type="submit"]').textContent = isLogin ? 'Log in' : 'Create account';
     document.getElementById('in-year').closest('.field').style.display = isLogin ? 'none' : '';
+    document.getElementById('in-name').closest('.field').style.display = isLogin ? 'none' : '';
+    document.getElementById('in-password').previousElementSibling.textContent = isLogin ? 'Password' : 'Create password (minimum 8 characters)';
+    document.getElementById('in-password').placeholder = isLogin ? 'Enter your password' : 'Create a password';
     document.getElementById('in-password').setAttribute('autocomplete', isLogin ? 'current-password' : 'new-password');
     authSwitchPrompt.textContent = isLogin ? "Don't have an account?" : 'Already have an account?';
     authModeToggle.textContent = isLogin ? 'Sign up' : 'Log in';
@@ -1172,11 +1180,12 @@ function escapeProfileText(value) {
     const year = document.getElementById('in-year').value;
     const name = document.getElementById('in-name').value.trim();
 
-if (authMode === 'signup' && !name) {
-  setFieldError('f-name', true);
-  showToast('Please enter your name.');
-  return;
-}
+setFieldError('f-name', authMode === 'signup' && !name);
+    if (authMode === 'signup' && !name) {
+      showToast('Please enter your name.');
+      document.getElementById('in-name').focus();
+      return;
+    }
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     setFieldError('f-email', !emailOk);
     setFieldError('f-password', password.length < 8);
@@ -1284,7 +1293,7 @@ if (authMode === 'signup' && !name) {
 
   document.getElementById('profileSetupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    showToast('Profile form ready. Profile database columns verify karke save feature connect karenge.');
+    showToast('Profile save is not connected yet; authentication is separate.');
   });
 
   if (window.supabaseClient) {
@@ -1475,7 +1484,9 @@ if (authMode === 'signup' && !name) {
     domainPanel.hidden = true;
     domainGrid.querySelectorAll('.domain-card').forEach(c => c.classList.remove('active'));
   });
-renderStoredExperiences();
+
+  // load any previously-submitted experiences on page open
+  renderStoredExperiences();
 </script>
 
 </body>
