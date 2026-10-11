@@ -1,9 +1,8 @@
 
 
-const SUPABASE_URL = "https://qbukmwdpyxmpdlqnpxyt.supabase.co";
+const IC_SUPABASE_URL = "https://qbukmwdpyxmpdlqnpxyt.supabase.co";
 
-const SUPABASE_KEY =
-  "sb_publishable_JE4lOM6xO3jCP52czZTgsQ_94-7ILMu";
+const IC_SUPABASE_KEY = "sb_publishable_JE4lOM6xO3jCP52czZTgsQ_94-7ILMu";
 
 if (!window.supabase?.createClient) {
   console.error(
@@ -11,10 +10,9 @@ if (!window.supabase?.createClient) {
   );
 } else {
   window.supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
+  IC_SUPABASE_URL,
+  IC_SUPABASE_KEY
+);
   console.log("InternConnect: Supabase connected!");
 }
 
