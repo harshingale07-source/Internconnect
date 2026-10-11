@@ -1131,6 +1131,13 @@ function escapeProfileText(value) {
     const email = document.getElementById('in-email').value.trim();
     const password = document.getElementById('in-password').value;
     const year = document.getElementById('in-year').value;
+    const name = document.getElementById('in-name').value.trim();
+
+if (authMode === 'signup' && !name) {
+  setFieldError('f-name', true);
+  showToast('Please enter your name.');
+  return;
+}
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     setFieldError('f-email', !emailOk);
     setFieldError('f-password', password.length < 8);
