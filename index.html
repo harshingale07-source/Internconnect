@@ -415,9 +415,9 @@
     <div id="joinFormWrap">
       <p class="sub">Use your personal email to create an account and connect with the student community.</p>
       <form id="joinForm" novalidate>
-        <div class="field" id="f-name">
-          <label for="in-name">Full name</label>
-          <input type="text" id="in-name" placeholder="Enter your full name" autocomplete="name">
+        <div class="field" id="f-signup-name">
+          <label for="signup-name">Full name</label>
+          <input type="text" id="signup-name" placeholder="Enter your full name" autocomplete="name">
           <div class="field-error">Enter your name.</div>
         </div>
         <div class="field" id="f-email">
@@ -1162,7 +1162,7 @@ function escapeProfileText(value) {
     joinTitle.textContent = isLogin ? 'Log in to InternConnect' : 'Join with your email';
     joinForm.querySelector('button[type="submit"]').textContent = isLogin ? 'Log in' : 'Create account';
     document.getElementById('in-year').closest('.field').style.display = isLogin ? 'none' : '';
-    document.getElementById('in-name').closest('.field').style.display = isLogin ? 'none' : '';
+    document.getElementById('signup-name').closest('.field').style.display = isLogin ? 'none' : '';
     document.getElementById('in-password').previousElementSibling.textContent = isLogin ? 'Password' : 'Create password (minimum 8 characters)';
     document.getElementById('in-password').placeholder = isLogin ? 'Enter your password' : 'Create a password';
     document.getElementById('in-password').setAttribute('autocomplete', isLogin ? 'current-password' : 'new-password');
@@ -1178,12 +1178,12 @@ function escapeProfileText(value) {
     const email = document.getElementById('in-email').value.trim();
     const password = document.getElementById('in-password').value;
     const year = document.getElementById('in-year').value;
-    const name = document.getElementById('in-name').value.trim();
+    const name = document.getElementById('signup-name').value.trim();
 
-setFieldError('f-name', authMode === 'signup' && !name);
+setFieldError('f-signup-name', authMode === 'signup' && !name);
     if (authMode === 'signup' && !name) {
       showToast('Please enter your name.');
-      document.getElementById('in-name').focus();
+      document.getElementById('signup-name').focus();
       return;
     }
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -1218,7 +1218,7 @@ setFieldError('f-name', authMode === 'signup' && !name);
    options: {
   data: {
     year,
-    full_name: document.getElementById('in-name')?.value.trim() || ''
+    full_name: document.getElementById('signup-name')?.value.trim() || ''
   }
 }
   });
