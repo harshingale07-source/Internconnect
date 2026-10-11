@@ -1107,9 +1107,13 @@ document.getElementById('joinSuccessMessage').textContent = 'You are logged in s
           options: { data: { year } }
         });
         if (error) throw error;
-        const needsConfirmation = !data.session;
-        document.getElementById('joinSuccessMessage').textContent = needsConfirmation
-          ? 'Signup request sent. Check your inbox for a confirmation email.'
+        document.getElementById('joinSuccessTitle').textContent = needsConfirmation
+  ? 'Check your inbox'
+  : 'Account created';
+
+document.getElementById('joinSuccessMessage').textContent = needsConfirmation
+  ? 'Signup request sent. Check your inbox for a confirmation email.'
+  : 'Your account has been created and you are logged in.';
           : 'Your account has been created and you are logged in.';
       }
       joinFormWrap.style.display = 'none';
