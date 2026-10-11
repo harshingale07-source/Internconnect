@@ -164,3 +164,67 @@ async function loadExperiences() {
 
   return data || [];
 }
+// GET CURRENT USER'S PROFILE
+async function getMyProfile() {
+  const client = window.supabaseClient;
+  const user = await getCurrentUser();
+
+  if (!user) {
+    throw new Error("Pehle login karo.");
+  }
+
+  const { data, error } = await client
+    .from("profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data;
+}
+
+
+// CREATE OR UPDATE MY PROFILE
+async function saveMyProfile({
+  full_name,
+  college,
+  branch,
+  graduation_year,
+  skills,
+  bio
+}) {
+  const client = window.supabaseClient;
+  const user = await getCurrentUser();
+
+  if (!user) {
+    throw new Error("Pehle login karo.");
+  }
+
+  const profile = {
+    id: user.id,
+    user_id: user.id,
+    full_name: full_name.trim(),
+    college: college.trim(),
+    branch: branch.trim(),
+    graduation_year: graduation_year
+      ? Number(graduation_year)
+      : null,
+    skills: skills.trim(),
+    bio: bio.trim(),
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await client
+    .from("profiles")
+    .upsert(profile, { onConflict: "user_id" })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Profile save error:", error.message);
+    throw error;
+  }
+
+  return data;
+}
