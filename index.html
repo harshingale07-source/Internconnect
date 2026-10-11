@@ -1096,27 +1096,38 @@
     submitBtn.textContent = authMode === 'login' ? 'Logging in…' : 'Creating account…';
     try {
       if (authMode === 'login') {
-        const { error } = await client.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-document.getElementById('joinSuccessTitle').textContent = 'Login successful';
-document.getElementById('joinSuccessMessage').textContent = 'You are logged in successfully.';
-      } else {
-        const { data, error } = await client.auth.signUp({
-          email,
-          password,
-          options: { data: { year } }
-        });
-        if (error) throw error;
-        document.getElementById('joinSuccessTitle').textContent = needsConfirmation
-  ? 'Check your inbox'
-  : 'Account created';
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password
+  });
 
-document.getElementById('joinSuccessMessage').textContent = needsConfirmation
-  ? 'Signup request sent. Check your inbox for a confirmation email.'
-  : 'Your account has been created and you are logged in.';
-          : 'Your account has been created and you are logged in.';
-      }
-      joinFormWrap.style.display = 'none';
+  if (error) throw error;
+
+  document.getElementById('joinSuccessTitle').textContent =
+    'Login successful';
+
+  document.getElementById('joinSuccessMessage').textContent =
+    'You are logged in successfully.';
+
+} else {
+  const { data, error } = await client.auth.signUp({
+    email,
+    password,
+    options: { data: { year } }
+  });
+
+  if (error) throw error;
+
+  const needsConfirmation = !data.session;
+
+  document.getElementById('joinSuccessTitle').textContent =
+    needsConfirmation ? 'Check your inbox' : 'Account created';
+
+  document.getElementById('joinSuccessMessage').textContent =
+    needsConfirmation
+      ? 'Signup request sent. Check your inbox for a confirmation email.'
+      : 'Your account has been created and you are logged in.';
+}
       joinSuccess.style.display = 'block';
       joinForm.reset();
       updateAuthUI();
