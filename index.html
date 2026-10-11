@@ -1259,11 +1259,31 @@ if (authMode === 'signup' && !name) {
     }
   }, true);
 
-  document.getElementById('joinDoneBtn').addEventListener('click', () => {
+  document.getElementById('joinDoneBtn').addEventListener('click', async () => {
+  const client = window.supabaseClient;
+
+  if (!client) {
+    showToast('Supabase connection nahi hai.');
+    return;
+  }
+
+  const { data: { session }, error } = await client.auth.getSession();
+
+  if (error) {
+    showToast(error.message);
+    return;
+  }
+
+  joinSuccess.style.display = 'none';
+
+  if (session) {
+    joinFormWrap.style.display = 'none';
+    document.getElementById('profileSetup').style.display = 'block';
+  } else {
     closeModal(joinOverlay);
     joinFormWrap.style.display = 'block';
-    joinSuccess.style.display = 'none';
-  });
+  }
+});
 
   if (window.supabaseClient) {
     window.supabaseClient.auth.onAuthStateChange(() => { updateAuthUI(); });
