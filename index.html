@@ -443,45 +443,6 @@
       </form>
     </div>
     <div class="success-state" id="joinSuccess" style="display:none;">
-      <div id="profileSetup" style="display:none; margin-top:20px;">
-  <h3>Complete Your Profile</h3>
-  <p>Tell the InternConnect community about yourself.</p>
-
-  <form id="profileSetupForm">
-    <div class="field">
-      <label for="profile-college">College Name</label>
-      <input id="profile-college" type="text" required>
-    </div>
-
-    <div class="field">
-      <label for="profile-branch">Branch</label>
-      <input id="profile-branch" type="text" placeholder="e.g. Information Technology" required>
-    </div>
-
-    <div class="field">
-      <label for="profile-year">Current Year</label>
-      <select id="profile-year" required>
-        <option value="">Select year</option>
-        <option value="1">First Year</option>
-        <option value="2">Second Year</option>
-        <option value="3">Third Year</option>
-        <option value="4">Final Year</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label for="profile-skills">Skills</label>
-      <input id="profile-skills" type="text" placeholder="e.g. C, C++, Python">
-    </div>
-
-    <div class="field">
-      <label for="profile-bio">Bio</label>
-      <textarea id="profile-bio" rows="3" placeholder="Tell us about yourself"></textarea>
-    </div>
-
-    <button class="btn btn-primary" type="submit">Save Profile</button>
-  </form>
-</div>
       <div class="check">✓</div>
      <h3 id="joinSuccessTitle">Check your inbox</h3>
 <p id="joinSuccessMessage">Check your inbox to confirm your email address.</p>
@@ -562,6 +523,46 @@
     <div style="margin:12px 0;">
       <button class="btn-ghost" id="editMyProfileBtn" type="button">Edit profile</button>
     </div>
+      <div id="profileSetup" style="display:none; margin-top:20px;">
+  <h3>Complete Your Profile</h3>
+  <p>Tell the InternConnect community about yourself.</p>
+
+  <form id="profileSetupForm">
+    <div class="field">
+      <label for="profile-college">College Name</label>
+      <input id="profile-college" type="text" required>
+    </div>
+
+    <div class="field">
+      <label for="profile-branch">Branch</label>
+      <input id="profile-branch" type="text" placeholder="e.g. Information Technology" required>
+    </div>
+
+    <div class="field">
+      <label for="profile-year">Current Year</label>
+      <select id="profile-year" required>
+        <option value="">Select year</option>
+        <option value="1">First Year</option>
+        <option value="2">Second Year</option>
+        <option value="3">Third Year</option>
+        <option value="4">Final Year</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="profile-skills">Skills</label>
+      <input id="profile-skills" type="text" placeholder="e.g. C, C++, Python">
+    </div>
+
+    <div class="field">
+      <label for="profile-bio">Bio</label>
+      <textarea id="profile-bio" rows="3" placeholder="Tell us about yourself"></textarea>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Save Profile</button>
+  </form>
+</div>
+
     <div class="profile-stats">
       <div class="profile-stat"><span class="num">—</span><span class="label">Experiences</span></div>
       <div class="profile-stat"><span class="num">—</span><span class="label">Answers</span></div>
@@ -1336,7 +1337,9 @@ setFieldError('f-signup-name', authMode === 'signup' && !name);
   document.getElementById('editMyProfileBtn').addEventListener('click', async () => {
     try {
       await loadMyProfile();
-      document.getElementById('profileSetup').style.display = 'block';
+      const editor = document.getElementById('profileSetup');
+      editor.style.display = 'block';
+      editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (err) { showToast(err.message || 'Profile load nahi hui.'); }
   });
 
