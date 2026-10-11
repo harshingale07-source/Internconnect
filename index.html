@@ -1160,7 +1160,12 @@ function escapeProfileText(value) {
   const { data, error } = await client.auth.signUp({
     email,
     password,
-    options: { data: { year } }
+   options: {
+  data: {
+    year,
+    full_name: document.getElementById('in-name')?.value.trim() || ''
+  }
+}
   });
 
   if (error) throw error;
