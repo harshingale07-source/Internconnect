@@ -553,16 +553,19 @@
       <button class="modal-close" id="closeProfile" aria-label="Close">✕</button>
     </div>
     <div class="profile-head">
-      <div class="profile-avatar">RS</div>
+      <div class="profile-avatar" id="myProfileAvatar">?</div>
       <div>
-        <div class="profile-name">Rahul Sharma</div>
-        <div class="profile-meta">Final Year · CSE · Pune, India</div>
+        <div class="profile-name" id="myProfileName">My profile</div>
+        <div class="profile-meta" id="myProfileMeta">Loading your account…</div>
       </div>
     </div>
+    <div style="margin:12px 0;">
+      <button class="btn-ghost" id="editMyProfileBtn" type="button">Edit profile</button>
+    </div>
     <div class="profile-stats">
-      <div class="profile-stat"><span class="num">12</span><span class="label">Experiences</span></div>
-      <div class="profile-stat"><span class="num">45</span><span class="label">Answers</span></div>
-      <div class="profile-stat"><span class="num">127</span><span class="label">Upvotes</span></div>
+      <div class="profile-stat"><span class="num">—</span><span class="label">Experiences</span></div>
+      <div class="profile-stat"><span class="num">—</span><span class="label">Answers</span></div>
+      <div class="profile-stat"><span class="num">—</span><span class="label">Upvotes</span></div>
     </div>
     <div class="profile-tabs" id="profileTabs">
       <button class="chip active" data-ptab="experiences">Experiences</button>
@@ -570,7 +573,7 @@
       <button class="chip" data-ptab="saved">Saved</button>
     </div>
     <div class="profile-list" id="profileList"></div>
-    <p class="modal-note">Sample profile — a live build would pull this from your verified account.</p>
+    <p class="modal-note">This profile belongs to the currently logged-in account.</p>
   </div>
 </div>
 
@@ -993,11 +996,17 @@ function escapeProfileText(value) {
   document.getElementById('openAskQuestion').addEventListener('click', () => openModal(askOverlay));
   document.getElementById('closeAsk').addEventListener('click', () => closeModal(askOverlay));
   document.getElementById('closeQuestion').addEventListener('click', () => closeModal(questionOverlayEl));
-  document.getElementById('openProfileNav').addEventListener('click', () => {
+  document.getElementById('openProfileNav').addEventListener('click', async () => {
+    const client = window.supabaseClient;
+    if (!client) { showToast('Supabase connection nahi hai.'); return; }
+    const { data: { user }, error } = await client.auth.getUser();
+    if (error || !user) { showToast('Apni profile dekhne ke liye pehle login karo.'); return; }
+    openModal(profileOverlay);
+    try { await loadMyProfile(); }
+    catch (err) { console.error(err); showToast(err.message || 'Profile load nahi hui.'); }
     renderProfileTab('experiences');
     document.getElementById('profileTabs').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     document.querySelector('#profileTabs .chip[data-ptab="experiences"]').classList.add('active');
-    openModal(profileOverlay);
   });
   document.getElementById('closeProfile').addEventListener('click', () => closeModal(profileOverlay));
   document.getElementById('profileTabs').addEventListener('click', (e) => {
@@ -1291,9 +1300,85 @@ setFieldError('f-signup-name', authMode === 'signup' && !name);
     }
   });
 
+  async function loadMyProfile() {
+    const client = window.supabaseClient;
+    if (!client) throw new Error('Supabase connection nahi hai.');
+    const { data: { user }, error: authError } = await client.auth.getUser();
+    if (authError) throw authError;
+    if (!user) throw new Error('Pehle login karo, phir profile open karo.');
+
+    const { data: profile, error } = await client
+      .from('profiles')
+      .select('id, full_name, college, branch, graduation_year')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (error) throw error;
+
+    const meta = user.user_metadata || {};
+    const name = profile?.full_name || meta.full_name || user.email?.split('@')[0] || 'Student';
+    const college = profile?.college || '';
+    const branch = profile?.branch || '';
+    const gradYear = profile?.graduation_year || '';
+    document.getElementById('myProfileName').textContent = name;
+    document.getElementById('myProfileAvatar').textContent =
+      name.split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join('') || '?';
+    document.getElementById('myProfileMeta').textContent =
+      [college, branch, gradYear ? 'Graduation ' + gradYear : user.email].filter(Boolean).join(' · ');
+
+    document.getElementById('profile-college').value = college;
+    document.getElementById('profile-branch').value = branch;
+    document.getElementById('profile-year').value = meta.current_year || '';
+    document.getElementById('profile-skills').value = meta.skills || '';
+    document.getElementById('profile-bio').value = meta.bio || '';
+    return user;
+  }
+
+  document.getElementById('editMyProfileBtn').addEventListener('click', async () => {
+    try {
+      await loadMyProfile();
+      document.getElementById('profileSetup').style.display = 'block';
+    } catch (err) { showToast(err.message || 'Profile load nahi hui.'); }
+  });
+
   document.getElementById('profileSetupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    showToast('Profile save is not connected yet; authentication is separate.');
+    const client = window.supabaseClient;
+    const btn = e.currentTarget.querySelector('button[type="submit"]');
+    const oldText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const { data: { user }, error: authError } = await client.auth.getUser();
+      if (authError) throw authError;
+      if (!user) throw new Error('Pehle login karo.');
+      const full_name = (user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student').trim();
+      const college = document.getElementById('profile-college').value.trim();
+      const branch = document.getElementById('profile-branch').value.trim();
+      const current_year = document.getElementById('profile-year').value;
+      const skills = document.getElementById('profile-skills').value.trim();
+      const bio = document.getElementById('profile-bio').value.trim();
+
+      // Only columns visible in the existing profiles table are written here.
+      const { error: saveError } = await client.from('profiles').upsert(
+        { id: user.id, full_name, college, branch },
+        { onConflict: 'id' }
+      );
+      if (saveError) throw saveError;
+
+      const { error: metaError } = await client.auth.updateUser({
+        data: { full_name, current_year, skills, bio }
+      });
+      if (metaError) throw metaError;
+      document.getElementById('profileSetup').style.display = 'none';
+      await loadMyProfile();
+      showToast('Profile saved successfully!');
+    } catch (err) {
+      console.error('Profile save failed:', err);
+      showToast(err.message || 'Profile save nahi hui. Supabase RLS policies check karo.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = oldText;
+    }
   });
 
   if (window.supabaseClient) {
